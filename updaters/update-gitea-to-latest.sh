@@ -17,13 +17,15 @@
 # V3: As a fallback, asks for the latest version if it was unable to automatically determine the latest version.
 # V4: If the latest version of gitea is already installed, the script will do nothing.
 
+#!/bin/bash
 echo "Determining latest gitea version..."
 redir=$(curl -s -S 'https://github.com/go-gitea/gitea/releases/latest')
 res=${?}
-match=$(echo ${redir} | grep -P '<html><body>You are being <a href=.https:\/\/github\.com\/go-gitea\/gitea\/releases\/tag\/v.\....?.?.>redirected<\/a>\.<\/body><\/html>')
+match=$(echo ${redir} | grep -P '<html><body>You are being <a href=.https:\/\/github\.com\/go-gitea\/gitea\/releases\/tag\/v.\.[0-9]{1,2}\.[0-9]{1,2}.>redirected<\/a>\.<\/body><\/html>')
 if [ "${res}" -ne 0 -o -z "${redir}" -o -z "${match}" ]; then
-        echo "Failed to determine latest version: curl gave exit code ${res}, an empty redirect ('${redir}') or the response was not formed as expected (regex failed)."
-        read -p 'Please manually enter the latest version of gitea (found at https://github.com/go-gitea/gitea/releases/latest):' version
+        echo "Failed to determine latest version: curl gave exit code ${res}, an empty redirect ('${redir}') or the response was not as expected (regex failed)."
+        echo "Result found by regex: ${match}"
+        read -p "Please manually enter the latest version of gitea:" version
 else
         version=$(echo ${redir} | sed -e 's/<html><body>You are being <a href="https:\/\/github.com\/go-gitea\/gitea\/releases\/tag\/v//g' -e 's/">redirected<\/a>.<\/body><\/html>//g')
         echo "Latest gitea version is ${version}."
